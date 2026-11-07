@@ -31,6 +31,8 @@ export async function attachRuntimeTunnel(
   deviceId: string,
   connection: TunnelConnection,
   deps: TunnelHolderDeps,
+  /** The app holding this tunnel, from `x-atlas-client`; recorded on its presence. */
+  client?: string,
 ): Promise<RuntimeTunnel> {
   const conn = randomUUID()
   const streams = new Map<string, { actorId: string; teamId: string }>() // who opened it, in which team
@@ -53,6 +55,8 @@ export async function attachRuntimeTunnel(
     deps.presence
       .put(userId, deviceId, {
         conn,
+        // Fixed for the life of this tunnel: what opened it, not what it reports.
+        ...(client ? { client } : {}),
         ...(status ? { status } : {}),
         ...(metrics ? { metrics, metricsReceivedAt } : {}),
         seenAt: Date.now(),
