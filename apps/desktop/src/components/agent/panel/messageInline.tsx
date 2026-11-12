@@ -8,9 +8,12 @@ import { useEffect, useRef, useState } from 'react'
 import { t } from '../../../i18n'
 import { renderMentionChip } from '../../../lib/atlasLinkMention'
 
+import { PdfFrame } from './MediaPreview'
 import { fileNameFromPath } from './textUtils'
 import { MEDIA_BOX } from './transferDownloads'
 import { ZoomableImage } from './ZoomableImage'
+
+import type { PdfSource } from './MediaPreview'
 
 export function AtlasMentionInline({
   url,
@@ -120,6 +123,8 @@ export type LightboxImage = {
   fileName: string
   /** Played with controls instead of shown as a still. */
   video?: boolean
+  /** Shown in a PDF frame, read from this file rather than `url`. */
+  pdf?: PdfSource
 }
 
 const STEP_KEYS: Record<string, number> = {
@@ -184,7 +189,8 @@ export function ImageLightbox({
         >
           {image && (
             <>
-              {image.video ? (
+              {image.pdf && <PdfFrame key={image.url} source={image.pdf} name={image.fileName} />}
+              {!image.pdf && image.video && (
                 <video
                   key={image.url}
                   src={image.url}
@@ -192,7 +198,8 @@ export function ImageLightbox({
                   autoPlay
                   className="max-h-full max-w-full rounded-lg bg-black shadow-2xl"
                 />
-              ) : (
+              )}
+              {!image.pdf && !image.video && (
                 <ZoomableImage
                   key={image.url}
                   url={image.url}

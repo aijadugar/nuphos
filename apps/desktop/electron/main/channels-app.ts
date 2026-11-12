@@ -234,6 +234,17 @@ export const appChannels = {
 
     return { saved: true, path: result.filePath }
   },
+  'fileTransfer:readOne': (
+    _e: IpcMainInvokeEvent,
+    args: {
+      teamId: string
+      sessionId?: string
+      groupId: string
+      fileId: string
+      channelId?: string
+      maxBytes: number
+    },
+  ) => fileTransfer.readOne(args),
   'fileTransfer:downloadAllZip': async (
     e: IpcMainInvokeEvent,
     args: {

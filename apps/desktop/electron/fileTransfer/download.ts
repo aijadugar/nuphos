@@ -59,6 +59,42 @@ export async function downloadOne(args: {
   await downloadTo(file.downloadUrl, args.destPath)
 }
 
+// Read one ready file into memory, for a preview the renderer cannot fetch: the
+// store sends no CORS headers. Past `maxBytes` the read stops and gives null.
+export async function readOne(args: {
+  teamId: string
+  sessionId?: string
+  groupId: string
+  fileId: string
+  channelId?: string
+  maxBytes: number
+}): Promise<Uint8Array | null> {
+  const group = await resolveDownloads(args.teamId, args.sessionId, args.groupId, args.channelId)
+  const url = group.files.find((f) => f.id === args.fileId)?.downloadUrl
+
+  if (!url) return null
+  const res = await fetch(url)
+
+  if (!res.ok || !res.body) return null
+  const reader: ReadableStreamDefaultReader<Uint8Array> = res.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+
+  for (;;) {
+    const { done, value } = await reader.read()
+
+    if (done) return Buffer.concat(chunks)
+    total += value.byteLength
+    // An oversized file is never read whole.
+    if (total > args.maxBytes) {
+      await reader.cancel()
+
+      return null
+    }
+    chunks.push(value)
+  }
+}
+
 // Download every ready file and stream them into a single cross-platform zip
 // (UTF-8 filenames, relPath structure preserved, no macOS resource-fork junk).
 export async function downloadAllAsZip(args: {

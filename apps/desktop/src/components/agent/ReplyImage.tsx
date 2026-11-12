@@ -153,7 +153,14 @@ export function ReplyImage({
         </button>
       </span>
       <ImageLightbox
-        images={[{ url: file.downloadUrl, fileName: file.fileName }]}
+        images={[
+          {
+            url: file.downloadUrl,
+            fileName: file.fileName,
+            video: kind === 'video',
+            pdf: kind === 'pdf' ? { teamId, groupId, fileId: file.id, size: file.size } : undefined,
+          },
+        ]}
         index={preview}
         onIndexChange={setPreview}
         onDownload={download}

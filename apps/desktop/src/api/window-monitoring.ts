@@ -73,6 +73,15 @@ export type WindowMonitoringApi = {
     fileName: string
     channelId?: string
   }): Promise<{ saved: boolean; path?: string }>
+  /** One file's bytes, read by the main process; null over `maxBytes` or when it is gone. */
+  fileTransferReadOne(args: {
+    teamId: string
+    sessionId?: string
+    groupId: string
+    fileId: string
+    channelId?: string
+    maxBytes: number
+  }): Promise<Uint8Array | null>
   fileTransferDownloadAllZip(args: {
     teamId: string
     sessionId?: string
